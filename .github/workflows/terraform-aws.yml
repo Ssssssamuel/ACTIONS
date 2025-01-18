@@ -68,7 +68,6 @@ jobs:
       - name: Test AWS Access
         run: aws s3 ls s3://your-terraform-state-bucket
        
-
       # Step 8: Terraform Init
       - name: Run Terraform Init
         run: terraform init
