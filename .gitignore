@@ -1,0 +1,12 @@
+# Ignore Terraform files
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+
+# Ignore local environment files
+terraform.tfvars
+test_key
+test_key.pub
+
