@@ -68,11 +68,8 @@ jobs:
       - name: Test AWS Access
         run: aws s3 ls s3://your-terraform-state-bucket
 
-      - name: Debug AWS Identity
-        run: aws sts get-caller-identity
-
       # Step 8: Terraform Init
-     - name: Run Terraform Init
+      - name: Run Terraform Init
         run: terraform init
 
       # Step 9: Terraform Plan
