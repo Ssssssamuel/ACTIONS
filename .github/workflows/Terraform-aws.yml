@@ -60,7 +60,7 @@ jobs:
         run: |
           touch test_key.pub
           echo "${{ secrets.PUBLIC_KEY_CONTENT }}" > test_key.pub
-
+          
       # Step 7: Set permissions on the public key file (optional, but recommended)
       - name: Set Permissions for Public Key
         run: chmod 600 test_key.pub
