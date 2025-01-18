@@ -49,25 +49,34 @@ jobs:
           echo "AWS_ACCESS_KEY_ID=$(echo $CREDENTIALS | awk '{print $1}')" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=$(echo $CREDENTIALS | awk '{print $2}')" >> $GITHUB_ENV
           echo "AWS_SESSION_TOKEN=$(echo $CREDENTIALS | awk '{print $3}')" >> $GITHUB_ENV
+
       # Step 5: Generate terraform.tfvars
       - name: Generate terraform.tfvars
         run: |
           echo "${{ secrets.TFVARS_CONTENT }}" > terraform.tfvars
+
       # Step 6: Create Public Key File
       - name: Generate Public Key File
         run: |
           touch test_key.pub
           echo "${{ secrets.PUBLIC_KEY_CONTENT }}" > test_key.pub
+          
       # Step 7: Set permissions on the public key file (optional, but recommended)
       - name: Set Permissions for Public Key
         run: chmod 600 test_key.pub
 
       - name: Test AWS Access
-        run: |
-          aws s3 ls s3://stackbuckstatefer
+        run: aws s3 ls s3://your-terraform-state-bucket
+
       # Step 8: Terraform Init
-      - name: Terraform Init
-        run: terraform init
+     - name: Run Terraform Init
+     run: terraform init
+     env:
+      TF_LOG: DEBUG
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+ 
 
       # Step 9: Terraform Plan
       - name: Terraform Plan
