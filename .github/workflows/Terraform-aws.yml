@@ -1,0 +1,91 @@
+name: Deploy to AWS with Terraform
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  AWS_REGION: us-east-1
+  TERRAFORM_WORKING_DIR: ./
+
+jobs:
+  terraform:
+    name: Terraform CI/CD Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.6
+
+      # Step 3: Configure AWS Credentials (for Management Account)
+      - name: Configure AWS Credentials (Management Account)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Step 4: Assume Role into Dev Account (Engineer Role)
+      - name: Assume Engineer Role in Dev Account
+        id: assume_role
+        run: |
+          ROLE_ARN=${{ secrets.AWS_ROLE_ARN }}
+          CREDENTIALS=$(aws sts assume-role \
+            --role-arn $ROLE_ARN \
+            --role-session-name terraform-session \
+            --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+            --output text)
+          
+          # Set AWS credentials environment variables
+          echo "AWS_ACCESS_KEY_ID=$(echo $CREDENTIALS | awk '{print $1}')" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(echo $CREDENTIALS | awk '{print $2}')" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=$(echo $CREDENTIALS | awk '{print $3}')" >> $GITHUB_ENV
+
+      # Step 5: Generate terraform.tfvars
+      - name: Generate terraform.tfvars
+        run: |
+          echo "${{ secrets.TFVARS_CONTENT }}" > terraform.tfvars
+
+      # Step 6: Create Public Key File
+      - name: Generate Public Key File
+        run: |
+          touch test_key.pub
+          echo "${{ secrets.PUBLIC_KEY_CONTENT }}" > test_key.pub
+          
+      # Step 7: Set permissions on the public key file (optional, but recommended)
+      - name: Set Permissions for Public Key
+        run: chmod 600 test_key.pub
+
+      - name: Test AWS Access
+        run: |
+          aws s3 ls s3://your-terraform-state-bucket
+          aws sts get-caller-identity
+
+      # Step 8: Terraform Init
+      - name: Run Terraform Init
+        run: terraform init
+
+      # Step 9: Terraform Plan
+      - name: Terraform Plan
+        run: terraform plan -var "PATH_TO_PUBLIC_KEY=test_key.pub"
+
+      # Step 10: Terraform Apply
+      - name: Terraform Apply
+        if: github.event_name == 'push'
+        run: terraform apply -auto-approve -var "PATH_TO_PUBLIC_KEY=test_key.pub"
+
+      # Optional Step: Clean up temporary files
+      - name: Clean up
+        if: always()
+        run: |
+          rm -f terraform.tfvars
+          rm -f test_key.pub
