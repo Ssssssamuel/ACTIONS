@@ -69,6 +69,9 @@ jobs:
         run: |
           aws sts get-caller-identity
           aws s3 ls s3://stackbuckstatefer
+          aws s3api head-object --bucket stackbuckstatefer --key trial/terraform.tfstate
+          aws s3api put-object --bucket stackbuckstatefer --key trial/test-file --body /dev/null
+          aws s3api delete-object --bucket stackbuckstatefer --key trial/test-file
        
       # Step 8: Terraform Init
       - name: Run Terraform Init
