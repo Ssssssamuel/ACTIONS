@@ -70,10 +70,9 @@ jobs:
        
       # Step 8: Terraform Init
       - name: Run Terraform Init
-        run: terraform init
+        run: terraform init -var "PATH_TO_PUBLIC_KEY=test_key.pub"
         env:
           TF_LOG: DEBUG
-
 
       # Step 9: Terraform Plan
       - name: Terraform Plan
