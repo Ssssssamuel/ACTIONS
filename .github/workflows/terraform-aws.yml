@@ -65,6 +65,7 @@ jobs:
       - name: Set Permissions for Public Key
         run: chmod 600 test_key.pub
 
+
       - name: Test AWS Access
         run: |
           aws sts get-caller-identity
