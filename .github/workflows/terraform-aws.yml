@@ -74,6 +74,7 @@ jobs:
         env:
           TF_LOG: DEBUG
 
+
       # Step 9: Terraform Plan
       - name: Terraform Plan
         run: terraform plan -var "PATH_TO_PUBLIC_KEY=test_key.pub"
