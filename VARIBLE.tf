@@ -41,3 +41,16 @@ variable "Record" {
   default = "Z01063533B95XIB5GVOHL"
   type    = string
 }
+
+variable "environment" {
+  default = "dev"
+}
+
+variable "ACCOUNTS" {
+  type = map(string)
+  default = {
+    dev = 222634373909
+    production = 1
+    uat = 225989363026
+  }
+}
