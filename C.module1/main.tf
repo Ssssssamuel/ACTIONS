@@ -4,6 +4,7 @@ resource "aws_key_pair" "Stack_KP" {
   public_key = file(var.PATH_TO_PUBLIC_KEY)
 }
 
+
 # Creating EC2 instance
 resource "aws_instance" "web-server" {
   ami = var.ami
