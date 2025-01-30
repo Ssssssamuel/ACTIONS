@@ -48,7 +48,7 @@ jobs:
       - name: Terraform Plan
         run: |
           export TF_LOG=DEBUG
-          terraform plan -var="AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }}"
+          terraform plan -var="AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }}" -lock=false
 
       # Step 10: Terraform Apply
       - name: Terraform Apply
