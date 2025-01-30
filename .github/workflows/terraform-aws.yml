@@ -80,6 +80,7 @@ jobs:
         run: |
             rm -rf .terraform/modules
             rm -rf .terraform/providers
+            rm -rf .terraform
             terraform init #-var "PATH_TO_PUBLIC_KEY=test_key.pub"
         env:
           TF_LOG: DEBUG
