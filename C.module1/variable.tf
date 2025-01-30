@@ -11,7 +11,7 @@ variable "environment" {
 }
 
 variable "security_groups" {
-  default = ""
+  default = "sg-05048737fb0f14c99"
 }
 
 variable "ACCOUNTS" {
