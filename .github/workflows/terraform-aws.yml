@@ -76,18 +76,18 @@ jobs:
        
       # Step 8: Terraform Init
       - name: Run Terraform Init
-        run: terraform init -var "PATH_TO_PUBLIC_KEY=test_key.pub"
+        run: terraform init #-var "PATH_TO_PUBLIC_KEY=test_key.pub"
         env:
           TF_LOG: DEBUG
 
       # Step 9: Terraform Plan
       - name: Terraform Plan
-        run: terraform plan -var "PATH_TO_PUBLIC_KEY=test_key.pub"
+        run: terraform plan #-var "PATH_TO_PUBLIC_KEY=test_key.pub"
 
       # Step 10: Terraform Apply
       - name: Terraform Apply
         if: github.event_name == 'push'
-        run: terraform apply -auto-approve -var "PATH_TO_PUBLIC_KEY=test_key.pub"
+        run: terraform apply -auto-approve #-var "PATH_TO_PUBLIC_KEY=test_key.pub"
 
       # Optional Step: Clean up temporary files
       - name: Clean up
