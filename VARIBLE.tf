@@ -27,6 +27,7 @@ variable "snapshot_id" {
 
 variable "security_groups" {
   default = "sg-05048737fb0f14c99"
+  type    = string
 }
 
 variable "ami" {
@@ -53,8 +54,8 @@ variable "environment" {
 variable "ACCOUNTS" {
   type = map(string)
   default = {
-    dev = 222634373909
+    dev        = 222634373909
     production = 1
-    uat = 225989363026
+    uat        = 225989363026
   }
 }
