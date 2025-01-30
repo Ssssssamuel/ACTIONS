@@ -1,4 +1,3 @@
-
 # Creating Key Pair
 resource "aws_key_pair" "Stack_KP" {
   key_name   = "test_key2"

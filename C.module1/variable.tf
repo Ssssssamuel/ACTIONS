@@ -7,14 +7,12 @@ variable "ami" {
 }
 
 variable "environment" {
-  default = "dev"
+  default = ""
 }
 
 variable "ACCOUNTS" {
   type = map(string)
   default = {
-    dev = 222634373909
-    production = 1
-    uat = 225989363026
+
   }
 }
