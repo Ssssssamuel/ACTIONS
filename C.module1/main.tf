@@ -17,6 +17,3 @@ resource "aws_instance" "web-server" {
   }
 }
 
-output "child_security_group_debug" {
-  value = var.security_groups
-}
