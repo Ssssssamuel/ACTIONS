@@ -33,22 +33,32 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-       
+
+      - name: Export AWS Credentials
+        run: |
+          export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          export AWS_REGION=${{ env.AWS_REGION }}
+ 
+
       # Step 8: Terraform Init
       - name: Run Terraform Init
         run: |
             rm -rf .terraform/modules
             rm -rf .terraform/providers
             rm -rf .terraform
-            terraform init 
+            terraform init             
         env:
           TF_LOG: DEBUG
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
 
       # Step 9: Terraform Plan
       - name: Terraform Plan
         run: |
           export TF_LOG=DEBUG
-          terraform plan -var="AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }}" -lock=false
+          terraform plan -lock=false -input=false
 
       # Step 10: Terraform Apply
       - name: Terraform Apply
