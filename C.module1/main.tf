@@ -10,9 +10,13 @@ resource "aws_instance" "web-server" {
   ami = var.ami
   instance_type = "t2.micro"
   key_name = aws_key_pair.Stack_KP.key_name
-  security_groups = [var.security_groups]
+  vpc_security_group_ids = [var.security_groups]
 
   tags = {
     Name = "GithubActionServer"
   }
+}
+
+output "child_security_group_debug" {
+  value = var.security_groups
 }

@@ -11,6 +11,7 @@ variable "environment" {
 }
 
 variable "security_groups" {
+  description = "Security group ID for EC2 instance"
   default = ""
 }
 
