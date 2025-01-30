@@ -13,7 +13,7 @@ module "my_entire_stack" {
   #AWS_REGION         = var.AWS_REGION
   PATH_TO_PUBLIC_KEY = var.PATH_TO_PUBLIC_KEY
   ami                = var.ami
-  security_groups    = var.security_groups
+  security_group_id    = var.security_groups
   # cert_arn           = var.cert_arn
   # Record             = var.Record
   # snapshot_id        = var.snapshot_id
