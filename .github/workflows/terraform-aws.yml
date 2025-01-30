@@ -70,7 +70,7 @@ jobs:
           terraform plan -var "PATH_TO_PUBLIC_KEY=test_key.pub" -lock=false -input=false
 
       # Step 10: Terraform Apply
-      - name: Terraform Apply
+      - name: Terraform Destroy
         if: github.event_name == 'push'
         run: terraform apply -auto-approve -var "PATH_TO_PUBLIC_KEY=test_key.pub" -lock=false
 
