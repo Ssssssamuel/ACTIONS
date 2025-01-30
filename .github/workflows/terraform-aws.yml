@@ -79,6 +79,7 @@ jobs:
       - name: Run Terraform Init
         run: |
             rm -rf .terraform/modules
+            rm -rf .terraform/providers
             terraform init #-var "PATH_TO_PUBLIC_KEY=test_key.pub"
         env:
           TF_LOG: DEBUG
