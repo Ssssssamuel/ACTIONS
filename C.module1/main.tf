@@ -1,9 +1,3 @@
-locals {
-  env = var.environment
-  account_to_deploy = var.ACCOUNTS[local.env]
-  account_arn = "arn:aws:iam::${local.account_to_deploy}:role/Engineer"
-}
-
 
 # Creating Key Pair
 resource "aws_key_pair" "Stack_KP" {
