@@ -25,6 +25,10 @@ variable "snapshot_id" {
   type    = string
 }
 
+variable "security_groups" {
+  default = "sg-05048737fb0f14c99"
+}
+
 variable "ami" {
   # default = "ami-090bc021dc497de64"
   # default = "ami-0f65981e8ccb90000"

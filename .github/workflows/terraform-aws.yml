@@ -72,7 +72,7 @@ jobs:
       # Step 10: Terraform Apply
       - name: Terraform Apply
         if: github.event_name == 'push'
-        run: terraform apply -auto-approve -var "PATH_TO_PUBLIC_KEY=test_key.pub"
+        run: terraform apply -auto-approve -var "PATH_TO_PUBLIC_KEY=test_key.pub" -lock=false
 
       # Optional Step: Clean up temporary files
       - name: Clean up
