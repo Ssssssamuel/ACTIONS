@@ -1,0 +1,86 @@
+#Using shell Module with AWS CLI Commands to avoid the compatibility issues with Ansible’s AWS modules in version 2.9
+---
+- name: "CliXX DB Deployment Ansible Playbook"
+  hosts: localhost
+  connection: local
+  become: ec2-user
+
+  vars:
+    instance_id: wordpressdbclixx-ecs
+    db_snapshot: wordpressclixxdb
+    security_group: sg-0173208337f142155
+    region: us-east-1
+
+  tasks:
+    - name: Restore DB from snapshot using AWS CLI
+      shell: |
+        aws rds restore-db-instance-from-db-snapshot \
+          --db-instance-identifier "{{ instance_id }}" \
+          --db-snapshot-identifier "{{ db_snapshot }}" \
+          --db-instance-class db.m7g.large \
+          --region "{{ region }}"
+      register: db_restore_result
+      ignore_errors: true
+
+    - name: Wait for DB instance to become available
+      retries: 10  # Retry up to 10 times
+      delay: 60    # Wait 60 seconds between retries
+      shell: |
+        aws rds describe-db-instances \
+          --db-instance-identifier "{{ instance_id }}" \
+          --query 'DBInstances[0].DBInstanceStatus' \
+          --region "{{ region }}" \
+          --output text
+      register: db_status
+      until: db_status.stdout == "available"
+
+    - name: Modify RDS instance to add security group using AWS CLI
+      shell: |
+        aws rds modify-db-instance \
+          --db-instance-identifier "{{ instance_id }}" \
+          --vpc-security-group-ids "{{ security_group }}" \
+          --region "{{ region }}"
+      register: modify_result
+      ignore_errors: true
+
+    - debug:
+        var: modify_result
+
+
+
+
+# ---
+# - name: "CliXX DB Deployment Ansible Playbook"
+#   hosts: localhost
+#   connection: local
+#   become: ec2-user
+
+#   vars:
+#     instance_id: wordpressdbclixx-ecs
+#     db_snapshot: wordpressclixxdb
+#     security_group: sg-0173208337f142155
+#     region: us-east-1
+
+#   tasks:
+#     - name: Restore DB from snapshot
+#       aws:
+#         service: rds
+#         command: restore-db-instance-from-db-snapshot
+#         region: "{{ region }}"
+#         parameters:
+#           DBInstanceIdentifier: "{{ instance_id }}"
+#           DBSnapshotIdentifier: "{{ db_snapshot }}"
+#           DBInstanceClass: db.m7g.large
+#       register: db_restore_result
+
+#     - debug:
+#         var: db_restore_result
+
+#     - name: Modify RDS instance to add security group
+#       aws:
+#         service: rds
+#         command: modify-db-instance
+#         region: "{{ region }}"
+#         parameters:
+#           DBInstanceIdentifier: "{{ instance_id }}"
+#           VpcSecurityGroupIds: ["{{ security_group }}"]
