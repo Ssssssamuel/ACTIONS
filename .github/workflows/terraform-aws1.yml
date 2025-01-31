@@ -9,7 +9,7 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY_URI: ${{ secrets.ECR_REPOSITORY_URI }}
-  IMAGE_TAG: Latest   #"1.0.${{ github.run_number }}"
+  IMAGE_TAG: "1.0.${{ github.run_number }}"
   TERRAFORM_WORKING_DIR: ./
 
 jobs:
@@ -30,8 +30,7 @@ jobs:
             -Dsonar.login=${SONAR_TOKEN} \
             -Dsonar.host.url=http://3.85.107.89:9000/
 
-jobs:
-  # 🟢 Step 1: Restore RDS Database from Snapshot (Using Ansible)
+  # 🟢 Step 2: Restore RDS Database from Snapshot (Using Ansible)
   restore-db:
     name: Restore Database from Snapshot
     runs-on: ubuntu-latest
@@ -54,7 +53,7 @@ jobs:
         run: |
           ansible-playbook -vvv deploy_db_ansible/deploy_db.yml
 
-  # 🟢 Step 2: Wait for Manual Confirmation After RDS Restoration
+  # 🟢 Step 3: Wait for Manual Confirmation After RDS Restoration
   confirm-db:
     name: Confirm DB Restoration
     runs-on: ubuntu-latest
@@ -77,7 +76,7 @@ jobs:
         run: |
           while true; do sleep 60; done
 
-  # 🟢 Step 3: Test Application
+  # 🟢 Step 4: Test Application
   test-app:
     name: Test Application
     runs-on: ubuntu-latest
@@ -101,7 +100,7 @@ jobs:
           
           echo "✅ Application test passed!"
 
-  # 🟢 Step 4: Manual Approval Before Pushing to ECR
+  # 🟢 Step 5: Manual Approval Before Pushing to ECR
   manual-approval:
     name: Manual Approval for Deployment
     runs-on: ubuntu-latest
@@ -125,7 +124,7 @@ jobs:
           echo "Waiting for manual approval..."
           while true; do sleep 60; done
 
- # 🟢 Step 5: Tear Down Docker Container & RDS Database
+ # 🟢 Step 6: Tear Down Docker Container & RDS Database
   tear-down-env:
     name: Tear Down Environment
     runs-on: ubuntu-latest
@@ -167,7 +166,7 @@ jobs:
         run: |
           ansible-playbook -vvv deploy_db_ansible/delete_db.yml
 
-  # 🟢 Step 6: Push Docker Image to ECR
+  # 🟢 Step 7: Push Docker Image to ECR
   push-to-ecr:
     name: Push Docker Image to ECR
     runs-on: ubuntu-latest
@@ -183,7 +182,7 @@ jobs:
           docker push $ECR_REPOSITORY_URI:clixx-image-$IMAGE_TAG
           docker push $ECR_REPOSITORY_URI:latest
 
-# 🟢 Step 7: Deploy to AWS ECS with Terraform
+# 🟢 Step 8: Deploy to AWS ECS with Terraform
   deploy:
     name: Deploy to AWS ECS
     runs-on: ubuntu-latest
