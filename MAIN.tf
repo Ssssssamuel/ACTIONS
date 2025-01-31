@@ -8,7 +8,7 @@ module "my_entire_stack" {
   #source = "./C.module1"
 
   #For remote source
-  source = "git::https://github.com/Ssssssamuel/Actions-Direc.git//C.module1"
+  source = "git::https://github.com/Ssssssamuel/Actions-Direc.git//C.module2"
 
   #AWS_REGION         = var.AWS_REGION
   PATH_TO_PUBLIC_KEY = var.PATH_TO_PUBLIC_KEY

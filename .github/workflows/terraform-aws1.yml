@@ -1,0 +1,237 @@
+name: Deploy to AWS ECS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY_URI: ${{ secrets.ECR_REPOSITORY_URI }}
+  IMAGE_TAG: "1.0.${{ github.run_number }}"
+  TERRAFORM_WORKING_DIR: ./
+
+jobs:
+  # 🟢 Step 1: Run SonarQube Scan
+  sonar-scan:
+    name: Run SonarQube Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up SonarQube Scanner
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=CliXX-App-Samuel \
+            -Dsonar.login=${SONAR_TOKEN} \
+            -Dsonar.host.url=http://3.85.107.89:9000/
+
+jobs:
+  # 🟢 Step 1: Restore RDS Database from Snapshot (Using Ansible)
+  restore-db:
+    name: Restore Database from Snapshot
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Ansible & AWS CLI
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip ansible awscli
+          pip3 install boto3 botocore
+
+      - name: Run Ansible Playbook to Restore DB
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          ansible-playbook -vvv deploy_db_ansible/deploy_db.yml
+
+  # 🟢 Step 2: Wait for Manual Confirmation After RDS Restoration
+  confirm-db:
+    name: Confirm DB Restoration
+    runs-on: ubuntu-latest
+    needs: restore-db
+
+    steps:
+      - name: Wait for Manual Confirmation
+        run: |
+          echo "**************************************************"
+          echo " 🛑 MANUAL APPROVAL REQUIRED! 🛑 "
+          echo " 1️⃣ Verify the AWS RDS instance has been restored."
+          echo " 2️⃣ Ensure database connection is successful."
+          echo " 3️⃣ Approve this workflow step in GitHub Actions."
+          echo "**************************************************"
+
+      - name: Pause for Approval
+        uses: hmarr/auto-approve-action@v3
+        with:
+          github-token: ${{ secrets.GHB_TOKEN }}
+        run: |
+          while true; do sleep 60; done
+
+  # 🟢 Step 3: Test Application
+  test-app:
+    name: Test Application
+    runs-on: ubuntu-latest
+    needs: build-and-run
+
+    steps:
+      - name: Wait for Container to Initialize
+        run: sleep 10  # Give time for the app to start
+
+      - name: Run Automated Tests
+        run: |
+          APP_URL="http://localhost:8080"
+          
+          echo "Testing Application at $APP_URL"
+
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}\n" $APP_URL)
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "❌ Application test failed!"
+            exit 1
+          fi
+          
+          echo "✅ Application test passed!"
+
+  # 🟢 Step 4: Manual Approval Before Pushing to ECR
+  manual-approval:
+    name: Manual Approval for Deployment
+    runs-on: ubuntu-latest
+    needs: test-app
+
+    steps:
+      - name: Notify User for Manual Testing
+        run: |
+          echo "**************************************************"
+          echo " 🛑 MANUAL APPROVAL REQUIRED! 🛑 "
+          echo " 1️⃣ Test the application running in GitHub Actions."
+          echo " 2️⃣ Ensure it connects to the AWS RDS instance."
+          echo " 3️⃣ Approve this workflow in GitHub Actions when ready."
+          echo "**************************************************"
+
+      - name: Pause for Manual Approval
+        uses: hmarr/auto-approve-action@v3
+        with:
+          github-token: ${{ secrets.GHB_TOKEN }}
+        run: |
+          echo "Waiting for manual approval..."
+          while true; do sleep 60; done
+
+ # 🟢 Step 5: Tear Down Docker Container & RDS Database
+  tear-down-env:
+    name: Tear Down Environment
+    runs-on: ubuntu-latest
+    needs: test-app
+
+    steps:
+      - name: Wait for Manual Confirmation Before Teardown
+        run: |
+          echo "**************************************************"
+          echo " 🛑 MANUAL APPROVAL REQUIRED! 🛑 "
+          echo " 1️⃣ Ensure you have finished testing."
+          echo " 2️⃣ Verify everything is working fine."
+          echo " 3️⃣ Approve this step to tear down the environment."
+          echo "**************************************************"
+
+      - name: Pause for Approval
+        uses: hmarr/auto-approve-action@v3
+        with:
+          github-token: ${{ secrets.GHB_TOKEN }}
+        run: |
+          while true; do sleep 60; done
+
+      - name: Stop and Remove Docker Container
+        run: |
+          docker stop clixx-cont || true
+          docker rm clixx-cont || true
+
+      - name: Install Ansible & AWS CLI
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip ansible awscli
+          pip3 install boto3 botocore
+
+      - name: Run Ansible Playbook to Delete RDS Database
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          ansible-playbook -vvv deploy_db_ansible/delete_db.yml
+
+  # 🟢 Step 6: Push Docker Image to ECR
+  push-to-ecr:
+    name: Push Docker Image to ECR
+    runs-on: ubuntu-latest
+    needs: manual-approval
+
+    steps:
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
+
+      - name: Push Docker Image to ECR
+        run: |
+          docker push $ECR_REPOSITORY_URI:clixx-image-$IMAGE_TAG
+          docker push $ECR_REPOSITORY_URI:latest
+
+# 🟢 Step 7: Deploy to AWS ECS with Terraform
+  deploy:
+    name: Deploy to AWS ECS
+    runs-on: ubuntu-latest
+    needs: push-to-ecr
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.6
+
+      # Step 8: Terraform Init
+      - name: Run Terraform Init
+        run: |
+            #rm -rf .terraform/modules
+            #rm -rf .terraform/providers
+            #rm -rf .terraform
+            terraform init             
+        env:
+          TF_LOG: DEBUG
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+
+      # Step 9: Terraform Plan
+      - name: Terraform Plan
+        run: |
+          export TF_LOG=DEBUG
+          terraform plan -lock=false -input=false
+
+      # Step 10: Terraform Apply
+      - name: Terraform Destroy
+        if: github.event_name == 'push'
+        run: terraform destroy -auto-approve -lock=false
+
+      # Optional Step: Clean up temporary files
+      - name: Clean up
+        if: always()
+        run: |
+          rm -f terraform.tfvars
+          rm -f test_key.pub
