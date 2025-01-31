@@ -13,35 +13,41 @@ env:
   TERRAFORM_WORKING_DIR: ./
 
 jobs:
-  # 🟢 Step 1: Run SonarQube Scan
-  sonar-scan:
-    name: Run SonarQube Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+# 🟢 Step 1: Run SonarQube Scan
+sonar-scan:
+  name: Run SonarQube Scan
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Install SonarQube Scanner
-        run: |
-          sudo apt update
-          sudo apt install -y unzip
-          wget -O sonarqube.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-          unzip sonarqube.zip
-          sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
-          echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH  # Add to the $GITHUB_PATH
+    - name: Install Java 11
+      run: |
+        sudo apt update
+        sudo apt install -y openjdk-11-jdk
+        java -version  # Verify Java version
 
-      - name: Verify Sonar Scanner Installation
-        run: |
-          sonar-scanner --version  # Verify if sonar-scanner is installed correctly
+    - name: Install SonarQube Scanner
+      run: |
+        sudo apt install -y unzip
+        wget -O sonarqube.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+        unzip sonarqube.zip
+        sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
+        echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH  # Add to the $GITHUB_PATH
 
-      - name: Run SonarQube Scanner
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=CliXX-App-Samuel \
-            -Dsonar.login=${SONAR_TOKEN} \
-            -Dsonar.host.url=http://3.85.107.89:9000/
+    - name: Verify Sonar Scanner Installation
+      run: |
+        sonar-scanner --version  # Verify if sonar-scanner is installed correctly
+
+    - name: Run SonarQube Scanner
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        sonar-scanner \
+          -Dsonar.projectKey=CliXX-App-Samuel \
+          -Dsonar.login=${SONAR_TOKEN} \
+          -Dsonar.host.url=http://3.85.107.89:9000/
+
 
 
   # 🟢 Step 2: Restore RDS Database from Snapshot (Using Ansible)
