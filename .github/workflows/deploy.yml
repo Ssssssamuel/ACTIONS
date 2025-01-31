@@ -45,7 +45,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           export JAVA_OPTS="-Dsonar.java.jdkHome=/usr/lib/jvm/java-11-openjdk-amd64"
-          export SONAR_SCANNER_OPTS="-Dsonar.java.additionalOpts=-Xmx2048m,-Dsun.reflect.inaccessibleObjectException=false"
+          export SONAR_SCANNER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
           sonar-scanner -X \
             -Dsonar.projectKey=CliXX-App-Samuel \
             -Dsonar.login=${SONAR_TOKEN} \
