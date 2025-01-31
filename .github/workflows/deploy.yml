@@ -21,14 +21,26 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up SonarQube Scanner
+      - name: Install SonarQube Scanner
+        run: |
+          sudo apt update
+          sudo apt install -y unzip
+          wget -O sonarqube.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          unzip sonarqube.zip
+          sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
+          echo "export PATH=$PATH:/opt/sonar-scanner/bin" >> ~/.bashrc
+          source ~/.bashrc
+          sonar-scanner --version # Verify installation
+
+      - name: Run SonarQube Scanner
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          sonar-scanner \
+          /opt/sonar-scanner/bin/sonar-scanner \
             -Dsonar.projectKey=CliXX-App-Samuel \
             -Dsonar.login=${SONAR_TOKEN} \
             -Dsonar.host.url=http://3.85.107.89:9000/
+
 
   # 🟢 Step 2: Restore RDS Database from Snapshot (Using Ansible)
   restore-db:
