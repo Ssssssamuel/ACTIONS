@@ -28,15 +28,19 @@ jobs:
           wget -O sonarqube.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
           unzip sonarqube.zip
           sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
-          echo "export PATH=$PATH:/opt/sonar-scanner/bin" >> ~/.bashrc
-          source ~/.bashrc
-          sonar-scanner --version # Verify installation
+          echo "export PATH=$PATH:/opt/sonar-scanner/bin" >> $GITHUB_ENV  # Add to GitHub Actions environment
+
+      - name: Verify Sonar Scanner Installation
+        run: |
+          source $GITHUB_ENV
+          sonar-scanner --version  # Verify if sonar-scanner is installed correctly
 
       - name: Run SonarQube Scanner
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          /opt/sonar-scanner/bin/sonar-scanner \
+          source $GITHUB_ENV
+          sonar-scanner \
             -Dsonar.projectKey=CliXX-App-Samuel \
             -Dsonar.login=${SONAR_TOKEN} \
             -Dsonar.host.url=http://3.85.107.89:9000/
