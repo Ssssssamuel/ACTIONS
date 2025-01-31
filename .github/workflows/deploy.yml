@@ -44,11 +44,12 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          export JAVA_OPTS="-Dsonar.java.jdkHome=/usr/lib/jvm/java-11-openjdk-amd64"
+          export SONAR_SCANNER_OPTS="-Dsonar.java.additionalOpts=-Xmx2048m,-Dsun.reflect.inaccessibleObjectException=false"
           sonar-scanner \
             -Dsonar.projectKey=CliXX-App-Samuel \
             -Dsonar.login=${SONAR_TOKEN} \
             -Dsonar.host.url=http://3.85.107.89:9000/
-
 
   # 🟢 Step 2: Restore RDS Database from Snapshot (Using Ansible)
   restore-db:
