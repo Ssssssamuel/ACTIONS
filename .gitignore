@@ -9,4 +9,14 @@
 terraform.tfvars
 test_key
 test_key.pub
+wp-content/*
+wp-admin/*
 
+#wp-includes/*
+wp-includes/js/dist
+wp-includes/js/mediaelement/mediaelement-and-player.js
+wp-includes/js/backbone.js
+wp-admin/includes/*
+wp-includes/js/tinymce/*
+wp-includes/ID3/module.audio.ac3.php
+python3-virtualenv/*
