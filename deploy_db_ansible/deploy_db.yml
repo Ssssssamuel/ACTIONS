@@ -4,7 +4,6 @@
   hosts: localhost
   connection: local
   become: true
-  become_user: ec2-user
 
   vars:
     instance_id: wordpressdbclixx-ecs
