@@ -69,7 +69,7 @@ jobs:
   manual-approval:
     name: Manual Approval Before Tear-Down
     runs-on: ubuntu-latest
-    needs: run-docker-container
+    needs: run-app
     steps:
       - name: Wait for Manual Approval
         run: |
