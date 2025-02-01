@@ -62,8 +62,9 @@ jobs:
       - name: Install Ansible & AWS CLI
         run: |
           sudo apt update
-          sudo apt install -y python3-pip ansible awscli
+          sudo apt install -y python3-pip ansible
           pip3 install boto3 botocore
+          pip3 install awscli
 
       - name: Run Ansible Playbook to Restore DB
         env:
