@@ -18,14 +18,14 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 # Open the page
 driver.get("http://localhost:8080")
 
-# ✅ Wait for the body to be loaded instead of `<title>`
-WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+# ✅ Wait for the title to be non-empty
+WebDriverWait(driver, 10).until(lambda d: d.title.strip() != "")
 
-# ✅ Get page title directly
+# ✅ Get the title
 page_title = driver.title.strip()
-print(f"Page title is: {repr(page_title)}")
+print(f"Page title is: {repr(page_title)}")  # Print the actual title for debugging
 
-# ✅ Check title with the expected format
+# ✅ Check title with expected format
 assert "CliXX Retail! Best Products On The Market" in page_title.replace("\n", "").replace("\r", "")
 
 # Close WebDriver
