@@ -46,8 +46,10 @@ jobs:
       - name: Check Docker Container Status
         run: |
           docker ps -a
-          docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080
+          docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
           docker logs clixx-cont
+          curl -I http://localhost:8080
+          docker exec clixx-cont env
 
       - name: Run Automated Tests
         run: |
