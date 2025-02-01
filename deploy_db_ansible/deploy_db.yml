@@ -3,7 +3,6 @@
 - name: "CliXX DB Deployment Ansible Playbook"
   hosts: localhost
   connection: local
-  become: true
 
   vars:
     instance_id: wordpressdbclixx-ecs
@@ -19,6 +18,10 @@
           --db-snapshot-identifier "{{ db_snapshot }}" \
           --db-instance-class db.m7g.large \
           --region "{{ region }}"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+        AWS_DEFAULT_REGION: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default(region) }}"
       register: db_restore_result
       ignore_errors: true
 
@@ -31,6 +34,10 @@
           --query 'DBInstances[0].DBInstanceStatus' \
           --region "{{ region }}" \
           --output text
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+        AWS_DEFAULT_REGION: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default(region) }}"
       register: db_status
       until: db_status.stdout == "available"
 
@@ -40,10 +47,15 @@
           --db-instance-identifier "{{ instance_id }}" \
           --vpc-security-group-ids "{{ security_group }}" \
           --region "{{ region }}"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+        AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+        AWS_DEFAULT_REGION: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default(region) }}"
       register: modify_result
       ignore_errors: true
 
-    - debug:
+    - name: Debug Modify Result
+      debug:
         var: modify_result
 
 
