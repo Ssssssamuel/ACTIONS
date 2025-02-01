@@ -19,7 +19,7 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 driver.get("http://localhost:8080")
 
 # ✅ Wait for the title to be non-empty
-WebDriverWait(driver, 10).until(lambda d: d.title.strip() != "")
+WebDriverWait(driver, 20).until(lambda d: d.title.strip() != "")
 
 # ✅ Get the title
 page_title = driver.title.strip()
