@@ -12,6 +12,7 @@ env:
   IMAGE_TAG: "1.0.${{ github.run_number }}"
   TERRAFORM_WORKING_DIR: ./
   ansible_remote_tmp: /tmp/.ansible
+  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
 jobs:
   # 🟢 Step 1: Run SonarQube Scan
@@ -50,7 +51,7 @@ jobs:
           sonar-scanner -X \
             -Dsonar.projectKey=CliXX-App-Samuel \
             -Dsonar.login=${SONAR_TOKEN} \
-            -Dsonar.host.url=http://3.85.107.89:9000/
+            -Dsonar.host.url=${SONAR_HOST_URL}
 
   # 🟢 Step 2: Restore RDS Database from Snapshot (Using Ansible)
   restore-db:
@@ -78,6 +79,20 @@ jobs:
           export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
           export AWS_DEFAULT_REGION=us-east-1
           ansible-playbook -vvv deploy_db_ansible/deploy_db.yml
+
+      - name: Configure Application DB Connection
+        env:
+          DB_USER_NAME: ${{ secrets.DB_USER_NAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          SERVER_INSTANCE: ${{ secrets.DB_HOST }}
+        run: |
+          cat <<EOF > db.setup
+          USE $DB_NAME;
+          UPDATE wp_options SET option_value = 'http://localhost:8080' WHERE option_value LIKE 'CliXX-APP-NLB%';
+          EOF
+
+          mysql -u $DB_USER_NAME --password=$DB_PASSWORD -h $SERVER_INSTANCE -D $DB_NAME < db.setup
 
   # 🟢 Step 3: Manual Approval Required
   manual-approval:
