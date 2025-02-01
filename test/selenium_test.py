@@ -12,5 +12,6 @@ service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 driver.get("http://localhost:8080")
-assert "CliXX Retail! – Best Products On The Market" in driver.title  # Modify based on actual app title
+assert "CliXX Retail! Best Products On The Market" in driver.title.replace('\n', '').replace('\r', '').strip()
+
 driver.quit()
