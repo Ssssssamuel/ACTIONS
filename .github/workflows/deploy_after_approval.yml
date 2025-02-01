@@ -7,7 +7,7 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY_URI: ${{ secrets.ECR_REPOSITORY_URI }}
-  IMAGE_TAG: "1.0.${{ github.run_number }}"
+  IMAGE_TAG: latest1 #"1.0.${{ github.run_number }}"
   TERRAFORM_WORKING_DIR: ./
 
 jobs:
