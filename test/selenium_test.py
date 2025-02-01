@@ -12,8 +12,8 @@ service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 driver.get("http://localhost:8080")
-out = print(f"Page title is: {repr(driver.title)}")
+print(f"Page title is: {repr(driver.title)}")
 
-assert "{}".format(out) in driver.title.replace('\n', '').replace('\r', '').strip()
+assert "CliXX Retail! Best Products On The Market" in driver
 
 driver.quit()
