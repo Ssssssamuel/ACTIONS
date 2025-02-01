@@ -1,27 +1,3 @@
-# from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service
-# from selenium.webdriver.chrome.options import Options
-# from webdriver_manager.chrome import ChromeDriverManager
-
-# chrome_options = Options()
-# chrome_options.add_argument("--headless")  # Run in headless mode
-# chrome_options.add_argument("--no-sandbox")
-# chrome_options.add_argument("--disable-dev-shm-usage")
-
-# service = Service(ChromeDriverManager().install())
-# driver = webdriver.Chrome(service=service, options=chrome_options)
-
-# driver.get("http://localhost:8080")
-
-# # Wait for the title element to be visible or page to fully load
-# WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "title")))
-
-# # Now assert the title
-# print(f"Page title is: {repr(driver.title)}")
-# assert "CliXX Retail! Best Products On The Market" in driver.title.replace('\n', '').replace('\r', '').strip()
-# driver.quit()
-
-
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -29,26 +5,28 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Configure Chrome options
+# Set up Chrome options
 chrome_options = Options()
-chrome_options.add_argument("--headless")  # Run Chrome in headless mode
-chrome_options.add_argument("--no-sandbox")  # Required for CI/CD environments
-chrome_options.add_argument("--disable-dev-shm-usage")  # Prevent memory issues
+chrome_options.add_argument("--headless")  # Run in headless mode
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
 
-# Initialize WebDriver with Chrome options
-service = Service()  # You can specify a chromedriver path if needed
+# Start WebDriver
+service = Service()
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
-# Navigate to the page
+# Open the page
 driver.get("http://localhost:8080")
 
-# Wait for the page title
-WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "title")))
+# ✅ Wait for the body to be loaded instead of `<title>`
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
-# Print and verify the page title
-print(f"Page title is: {repr(driver.title)}")
-assert "CliXX Retail! Best Products On The Market" in driver.title.replace('\n', '').replace('\r', '').strip()
+# ✅ Get page title directly
+page_title = driver.title.strip()
+print(f"Page title is: {repr(page_title)}")
 
-# Close the driver
+# ✅ Check title with the expected format
+assert "CliXX Retail! Best Products On The Market" in page_title.replace("\n", "").replace("\r", "")
+
+# Close WebDriver
 driver.quit()
-
