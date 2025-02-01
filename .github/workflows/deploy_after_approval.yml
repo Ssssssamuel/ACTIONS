@@ -10,7 +10,7 @@ env:
   IMAGE_TAG: "1.0.${{ github.run_number }}"
   TERRAFORM_WORKING_DIR: ./
 
-
+jobs:
   # 🟢 Step 3: Run Docker Container
   run-app:
     name: Run Docker Container
