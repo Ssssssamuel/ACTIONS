@@ -1,20 +1,20 @@
 # Ignore Terraform files
-*.tfstate
-*.tfstate.backup
-.terraform/
-.terraform.lock.hcl
+# *.tfstate
+# *.tfstate.backup
+# .terraform/
+# .terraform.lock.hcl
 
 
 # Ignore local environment files
 terraform.tfvars
 test_key
-test_key.pub
-wp-content/*
+# test_key.pub
+# wp-content/*
 
-#wp-includes/*
-wp-includes/js/dist
-wp-includes/js/mediaelement/mediaelement-and-player.js
-wp-includes/js/backbone.js
-wp-includes/js/tinymce/*
-wp-includes/ID3/module.audio.ac3.php
-python3-virtualenv/*
+# #wp-includes/*
+# wp-includes/js/dist
+# wp-includes/js/mediaelement/mediaelement-and-player.js
+# wp-includes/js/backbone.js
+# wp-includes/js/tinymce/*
+# wp-includes/ID3/module.audio.ac3.php
+# python3-virtualenv/*
