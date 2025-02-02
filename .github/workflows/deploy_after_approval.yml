@@ -22,7 +22,8 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -f app_code/Dockerfile -t clixx-image:$IMAGE_TAG .
+          cd app_code
+          docker build -t clixx-image:$IMAGE_TAG .
           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:clixx-image-$IMAGE_TAG
           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:latest
 
