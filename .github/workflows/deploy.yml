@@ -1,0 +1,110 @@
+name: Deploy to AWS ECS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY_URI: ${{ secrets.ECR_REPOSITORY_URI }}
+  IMAGE_TAG: "1.0.${{ github.run_number }}"
+  TERRAFORM_WORKING_DIR: ./
+  ansible_remote_tmp: /tmp/.ansible
+  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+jobs:
+  # 🟢 Step 1: Run SonarQube Scan
+  sonar-scan:
+    name: Run SonarQube Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Java 11
+        run: |
+          sudo apt update
+          sudo apt install -y openjdk-11-jdk
+          java -version  # Verify Java version        
+
+      - name: Install SonarQube Scanner
+        run: |
+          sudo apt update
+          sudo apt install -y unzip
+          wget -O sonarqube.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          unzip sonarqube.zip
+          sudo mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner
+          echo "/opt/sonar-scanner/bin" >> $GITHUB_PATH  # Add to the $GITHUB_PATH
+
+      - name: Verify Sonar Scanner Installation
+        run: |
+          sonar-scanner --version  # Verify if sonar-scanner is installed correctly
+
+      - name: Run SonarQube Scanner
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          export JAVA_OPTS="-Dsonar.java.jdkHome=/usr/lib/jvm/java-11-openjdk-amd64"
+          export SONAR_SCANNER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
+          sonar-scanner -X \
+            -Dsonar.projectKey=CliXX-App-Samuel \
+            -Dsonar.login=${SONAR_TOKEN} \
+            -Dsonar.host.url=${SONAR_HOST_URL}
+
+  # 🟢 Step 2: Restore RDS Database from Snapshot (Using Ansible)
+  restore-db:
+    name: Restore Database from Snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Ansible & AWS CLI
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip
+          pip3 install boto3 botocore
+          pip3 install awscli
+          pip install --upgrade ansible
+
+      - name: Run Ansible Playbook to Restore DB
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          export AWS_DEFAULT_REGION=us-east-1
+          ansible-playbook -vvv deploy_db_ansible/deploy_db.yml
+
+      - name: Configure Application DB Connection
+        env:
+          DB_USER_NAME: ${{ secrets.DB_USER_NAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          SERVER_INSTANCE: ${{ secrets.DB_HOST }}
+        run: |
+          cat <<EOF > db.setup
+          USE $DB_NAME;
+          UPDATE wp_options SET option_value = 'http://localhost:8080' WHERE option_value LIKE 'CliXX-APP-NLB%';
+          EOF
+
+          mysql -u $DB_USER_NAME --password=$DB_PASSWORD -h $SERVER_INSTANCE -D $DB_NAME < db.setup
+
+  # 🟢 Step 3: Manual Approval Required
+  manual-approval:
+    name: Manual Approval Before Deployment
+    runs-on: ubuntu-latest
+    needs: restore-db
+    steps:
+      - name: Wait for Manual Approval
+        run: |
+          echo "**************************************************"
+          echo " 🛑 MANUAL APPROVAL REQUIRED! 🛑 "
+          echo " 1️⃣ Verify the AWS RDS instance is restored."
+          echo " 2️⃣ Ensure database connection is successful."
+          echo " 3️⃣ Manually trigger the next workflow in GitHub Actions."
+          echo "**************************************************"
