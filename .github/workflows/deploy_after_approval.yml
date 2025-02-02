@@ -69,6 +69,11 @@ jobs:
 
           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
 
+          docker exec -it clixx-cont bash
+          ls -l /var/www/html
+          cat /var/www/html/index.php
+
+
       - name: Set Up Python & Install Selenium
         run: |
           sudo apt install -y python3-pip xvfb

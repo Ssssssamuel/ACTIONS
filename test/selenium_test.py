@@ -16,13 +16,13 @@ service = Service()
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # Open the page
-driver.get("http://http://172.17.0.2")
+driver.get("http://172.17.0.2")
 
 # Print the page source for debugging
 print("Page Source:\n", driver.page_source[:500])  # Print only the first 500 characters
 
 try:
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "title")))
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
     print("Page title is:", driver.title)
 except Exception as e:
     print("Title not found!", str(e))
