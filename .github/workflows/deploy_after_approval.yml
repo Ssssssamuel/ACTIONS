@@ -65,6 +65,8 @@ jobs:
           
           echo "*********✅ Application test passed**********!"
 
+          curl -v http://localhost:8080
+
           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
 
       - name: Set Up Python & Install Selenium
