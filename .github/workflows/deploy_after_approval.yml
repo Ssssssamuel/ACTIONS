@@ -48,8 +48,11 @@ jobs:
           docker ps -a
           docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
           docker logs clixx-cont
-          curl -I http://localhost:8080
           docker exec clixx-cont env
+          docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
+          docker exec -i clixx-cont ls -l /var/www/html
+          docker exec -i clixx-cont cat /var/www/html/index.php
+          curl -I http://localhost:8080
 
       - name: Run Automated Tests
         run: |
@@ -66,12 +69,6 @@ jobs:
           echo "*********✅ Application test passed**********!"
 
           curl -v http://localhost:8080
-
-          docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
-          docker exec -i clixx-cont ls -l /var/www/html
-          docker exec -i clixx-cont cat /var/www/html/index.php
-
-
 
       - name: Set Up Python & Install Selenium
         run: |
