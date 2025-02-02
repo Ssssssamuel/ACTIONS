@@ -78,9 +78,9 @@ jobs:
 
       - name: Run Selenium Test
         run: |
-        netstat -tulnp | grep 8080
-        curl http://host.docker.internal:8080
-        python3 test/selenium_test.py
+          netstat -tulnp | grep 8080
+          curl http://host.docker.internal:8080
+          python3 test/selenium_test.py
 
   # 🟢 Step 3: Manual Approval Required
   manual-approval:
