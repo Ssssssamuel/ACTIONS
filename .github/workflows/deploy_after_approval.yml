@@ -67,7 +67,6 @@ jobs:
 
           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
 
-
       - name: Set Up Python & Install Selenium
         run: |
           sudo apt install -y python3-pip xvfb
