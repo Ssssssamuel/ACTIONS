@@ -3,7 +3,7 @@ name: Deploy to AWS ECS
 on:
   push:
     branches:
-      - dev
+      - main
   pull_request:
 
 env:
