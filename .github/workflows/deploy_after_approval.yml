@@ -328,7 +328,7 @@ jobs:
       - name: Check Docker Container Status
         run: |
           docker ps -a
-          ip addr show
+          # ip addr show
           docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
           docker logs -f clixx-cont
           docker exec clixx-cont env
