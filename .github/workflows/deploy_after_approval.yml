@@ -140,8 +140,8 @@ jobs:
           echo "Checking running containers:"
           docker ps -a
           
-          echo "Checking open ports inside the container:"
-          docker exec clixx-cont ss -tulnp
+          # echo "Checking open ports inside the container:"
+          # docker exec clixx-cont ss -tulnp
 
       - name: Wait for Container to Initialize
         run: sleep 60  # Wait for app to start properly
@@ -152,7 +152,7 @@ jobs:
           docker logs clixx-cont
           
           echo "Checking if Apache is listening on port 80:"
-          docker exec clixx-cont netstat -tulnp | grep LISTEN
+          docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
           
           echo "Checking if app is accessible inside container:"
           docker exec clixx-cont curl -I http://localhost:80
