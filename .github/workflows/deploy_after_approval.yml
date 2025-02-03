@@ -315,7 +315,8 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
         run: |
           docker ps -q --filter "name=clixx-cont" | grep -q . && docker stop clixx-cont && docker rm clixx-cont || echo "No running container found"
-          docker run -d --name clixx-cont \
+          docker network create clixx-net || true
+          docker run -d --name clixx-cont --network clixx-net \
             -e DB_HOST=${DB_HOST} \
             -e DB_USER=${DB_USER_NAME} \
             -e DB_PASSWORD=${DB_PASSWORD} \
