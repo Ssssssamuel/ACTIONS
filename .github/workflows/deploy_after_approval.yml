@@ -1,8 +1,105 @@
+# name: Deploy After Approval
+
+# on:
+#   workflow_dispatch:
+
+
+# env:
+#   AWS_REGION: us-east-1
+#   ECR_REPOSITORY_URI: ${{ secrets.ECR_REPOSITORY_URI }}
+#   IMAGE_TAG: "1.0.${{ github.run_number }}"
+#   TERRAFORM_WORKING_DIR: ./
+
+# jobs:
+#   # 🟢 Step 3: Run Docker Container
+#   run-app:
+#     name: Run Docker Container
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
+
+#       - name: Build Docker Image
+#         run: |
+#           cd app_code
+#           docker build -t clixx-image:$IMAGE_TAG .
+#           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:clixx-image-$IMAGE_TAG
+#           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:latest
+
+#       - name: Run Docker Container in GitHub Actions
+#         env:
+#           DB_HOST: ${{ secrets.DB_HOST }}  # AWS RDS Endpoint
+#           DB_USER_NAME: ${{ secrets.DB_USER_NAME }}
+#           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+#           DB_NAME: ${{ secrets.DB_NAME }}
+#         run: |
+#           docker run -d --name clixx-cont \
+#             -e DB_HOST=${DB_HOST} \
+#             -e DB_USER=${DB_USER_NAME} \
+#             -e DB_PASSWORD=${DB_PASSWORD} \
+#             -e DB_NAME=${DB_NAME} \
+#             -p 8080:80 clixx-image:$IMAGE_TAG
+
+#       - name: Wait for Container to Initialize
+#         run: sleep 60  # Wait for app to start properly
+
+#       - name: Check Docker Container Status
+#         run: |
+#           docker ps -a
+#           ip addr show
+#           docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
+#           docker logs clixx-cont
+#           docker exec clixx-cont env
+#           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
+#           docker exec -i clixx-cont ls -l /var/www/html
+#           docker exec -i clixx-cont cat /var/www/html/index.php
+#           curl -I http://localhost:8080
+
+#       - name: Run Automated Tests
+#         run: |
+#           APP_URL="http://localhost:8080"
+          
+#           echo "Testing Application at $APP_URL"
+
+#           HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}\n" $APP_URL)
+#           if [ "$HTTP_STATUS" -ne 200 ]; then
+#             echo "*******❌ Application test failed*******!"
+#             exit 1
+#           fi
+          
+#           echo "*********✅ Application test passed**********!"
+
+#           curl -v http://localhost:8080
+
+#       - name: Set Up Python & Install Selenium
+#         run: |
+#           sudo apt install -y python3-pip xvfb
+#           pip3 install selenium webdriver-manager
+
+#       - name: Run Selenium Test
+#         run: python3 test/selenium_test.py
+
+#   # 🟢 Step 3: Manual Approval Required
+#   manual-approval:
+#     name: Manual Approval Before Tear-Down
+#     runs-on: ubuntu-latest
+#     needs: run-app
+#     steps:
+#       - name: Wait for Manual Approval
+#         run: |
+#           echo "**************************************************"
+#           echo " 🛑 MANUAL APPROVAL REQUIRED! 🛑 "
+#           echo " 1️⃣ Verify the Application is running fine."
+#           echo " 2️⃣ Ensure you can connect seamlessly."
+#           echo " 3️⃣ Manually trigger the next workflow in GitHub Actions."
+#           echo "**************************************************"
+
+
 name: Deploy After Approval
 
 on:
   workflow_dispatch:
-
 
 env:
   AWS_REGION: us-east-1
@@ -11,7 +108,6 @@ env:
   TERRAFORM_WORKING_DIR: ./
 
 jobs:
-  # 🟢 Step 3: Run Docker Container
   run-app:
     name: Run Docker Container
     runs-on: ubuntu-latest
@@ -29,7 +125,7 @@ jobs:
 
       - name: Run Docker Container in GitHub Actions
         env:
-          DB_HOST: ${{ secrets.DB_HOST }}  # AWS RDS Endpoint
+          DB_HOST: ${{ secrets.DB_HOST }}
           DB_USER_NAME: ${{ secrets.DB_USER_NAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
@@ -40,37 +136,41 @@ jobs:
             -e DB_PASSWORD=${DB_PASSWORD} \
             -e DB_NAME=${DB_NAME} \
             -p 8080:80 clixx-image:$IMAGE_TAG
+          
+          echo "Checking running containers:"
+          docker ps -a
+          
+          echo "Checking open ports inside the container:"
+          docker exec clixx-cont netstat -tulnp
 
       - name: Wait for Container to Initialize
         run: sleep 60  # Wait for app to start properly
 
       - name: Check Docker Container Status
         run: |
-          docker ps -a
-          ip addr show
-          docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
+          echo "Checking container logs:"
           docker logs clixx-cont
-          docker exec clixx-cont env
-          docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
-          docker exec -i clixx-cont ls -l /var/www/html
-          docker exec -i clixx-cont cat /var/www/html/index.php
+          
+          echo "Checking if Apache is listening on port 80:"
+          docker exec clixx-cont netstat -tulnp | grep LISTEN
+          
+          echo "Checking if app is accessible inside container:"
+          docker exec clixx-cont curl -I http://localhost:80
+          
+          echo "Checking if app is accessible outside container:"
           curl -I http://localhost:8080
 
       - name: Run Automated Tests
         run: |
           APP_URL="http://localhost:8080"
-          
           echo "Testing Application at $APP_URL"
-
+          
           HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}\n" $APP_URL)
           if [ "$HTTP_STATUS" -ne 200 ]; then
-            echo "*******❌ Application test failed*******!"
+            echo "❌ Application test failed!"
             exit 1
           fi
-          
-          echo "*********✅ Application test passed**********!"
-
-          curl -v http://localhost:8080
+          echo "✅ Application test passed!"
 
       - name: Set Up Python & Install Selenium
         run: |
@@ -80,7 +180,6 @@ jobs:
       - name: Run Selenium Test
         run: python3 test/selenium_test.py
 
-  # 🟢 Step 3: Manual Approval Required
   manual-approval:
     name: Manual Approval Before Tear-Down
     runs-on: ubuntu-latest
