@@ -48,7 +48,7 @@ jobs:
         run: |
           docker ps -a
           ip addr show
-          docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
+          docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080
           docker logs clixx-cont
           docker exec clixx-cont env
           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
