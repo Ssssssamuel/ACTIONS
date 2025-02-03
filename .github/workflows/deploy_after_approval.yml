@@ -303,6 +303,12 @@ jobs:
 
       - name: Build Docker Image
         run: |
+          sudo rm -rf /tmp/*
+          sudo rm -rf ~/.cache/*
+          pip cache purge
+          docker system prune -af
+          docker builder prune --force
+          gh run list --limit 50 | awk '{print $1}' | xargs -I {} gh run delete {}
           cd app_code
           docker build --no-cache -t clixx-image:$IMAGE_TAG .
           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:clixx-image-$IMAGE_TAG
