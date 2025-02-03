@@ -7,7 +7,7 @@
   vars:
     instance_id: wordpressdbclixx-ecs
     db_snapshot: wordpressclixxdb
-    security_group: sg-05048737fb0f14c99
+    security_group: sg-0173208337f142155
     region: us-east-1
 
   tasks:
