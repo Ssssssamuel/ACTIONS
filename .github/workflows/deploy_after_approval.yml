@@ -34,7 +34,7 @@
 #           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 #           DB_NAME: ${{ secrets.DB_NAME }}
 #         run: |
-#           docker run -d --name Clixx-Cont \
+#           docker run -d --name clixx-cont \
 #             -e DB_HOST=${DB_HOST} \
 #             -e DB_USER=${DB_USER_NAME} \
 #             -e DB_PASSWORD=${DB_PASSWORD} \
@@ -48,12 +48,12 @@
 #         run: |
 #           docker ps -a
 #           ip addr show
-#           docker exec Clixx-Cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
-#           docker logs Clixx-Cont
-#           docker exec Clixx-Cont env
-#           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' Clixx-Cont
-#           docker exec -i Clixx-Cont ls -l /var/www/html
-#           docker exec -i Clixx-Cont cat /var/www/html/index.php
+#           docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
+#           docker logs clixx-cont
+#           docker exec clixx-cont env
+#           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
+#           docker exec -i clixx-cont ls -l /var/www/html
+#           docker exec -i clixx-cont cat /var/www/html/index.php
 #           curl -I http://localhost:8080
 
 #       - name: Run Automated Tests
@@ -130,7 +130,7 @@
 #           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 #           DB_NAME: ${{ secrets.DB_NAME }}
 #         run: |
-#           docker run -d --name Clixx-Cont \
+#           docker run -d --name clixx-cont \
 #             -e DB_HOST=${DB_HOST} \
 #             -e DB_USER=${DB_USER_NAME} \
 #             -e DB_PASSWORD=${DB_PASSWORD} \
@@ -146,13 +146,13 @@
 #       - name: Check Docker Container Status
 #         run: |
 #           echo "Checking container logs:"
-#           docker logs Clixx-Cont
+#           docker logs clixx-cont
           
 #           echo "Checking if Apache is listening on port 80:"
-#           docker exec Clixx-Cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
+#           docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
           
 #           echo "Checking if app is accessible inside container:"
-#           docker exec Clixx-Cont curl -I http://localhost:80
+#           docker exec clixx-cont curl -I http://localhost:80
           
 #           echo "Checking if app is accessible outside container:"
 #           curl -I http://localhost:8080
@@ -225,7 +225,7 @@
 #           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 #           DB_NAME: ${{ secrets.DB_NAME }}
 #         run: |
-#           docker run -d --name Clixx-Cont \
+#           docker run -d --name clixx-cont \
 #             -e DB_HOST=${DB_HOST} \
 #             -e DB_USER=${DB_USER_NAME} \
 #             -e DB_PASSWORD=${DB_PASSWORD} \
@@ -237,10 +237,10 @@
 #       - name: Check Docker Container Status
 #         run: |
 #           docker ps -a
-#           docker exec Clixx-Cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
-#           docker logs Clixx-Cont
+#           docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
+#           docker logs clixx-cont
 #           curl -I http://localhost:8080
-#           docker exec Clixx-Cont env
+#           docker exec clixx-cont env
 #       - name: Run Automated Tests
 #         run: |
 #           APP_URL="http://localhost:8080"
@@ -254,9 +254,9 @@
           
 #           echo "*********✅ Application test passed**********!"
 #           curl -v http://localhost:8080
-#           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' Clixx-Cont
-#           docker exec -i Clixx-Cont ls -l /var/www/html
-#           docker exec -i Clixx-Cont cat /var/www/html/index.php
+#           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
+#           docker exec -i clixx-cont ls -l /var/www/html
+#           docker exec -i clixx-cont cat /var/www/html/index.php
 #       - name: Set Up Python & Install Selenium
 #         run: |
 #           sudo apt install -y python3-pip xvfb
@@ -304,7 +304,7 @@ jobs:
       - name: Build Docker Image
         run: |
           cd app_code
-          docker build -t clixx-image:$IMAGE_TAG .
+          docker build --no-cache -t clixx-image:$IMAGE_TAG .
           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:clixx-image-$IMAGE_TAG
           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:latest
       - name: Run Docker Container in GitHub Actions
@@ -314,7 +314,8 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
         run: |
-          docker run -d --name Clixx-Cont \
+          docker ps -q --filter "name=clixx-cont" | grep -q . && docker stop clixx-cont && docker rm clixx-cont || echo "No running container found"
+          docker run -d --name clixx-cont \
             -e DB_HOST=${DB_HOST} \
             -e DB_USER=${DB_USER_NAME} \
             -e DB_PASSWORD=${DB_PASSWORD} \
@@ -327,12 +328,12 @@ jobs:
         run: |
           docker ps -a
           ip addr show
-          docker exec Clixx-Cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
-          docker logs -f Clixx-Cont
-          docker exec Clixx-Cont env
-          docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' Clixx-Cont
-          docker exec -i Clixx-Cont ls -l /var/www/html
-          docker exec -i Clixx-Cont cat /var/www/html/index.php
+          docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}\n" http://localhost:80
+          docker logs -f clixx-cont
+          docker exec clixx-cont env
+          docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
+          docker exec -i clixx-cont ls -l /var/www/html
+          docker exec -i clixx-cont cat /var/www/html/index.php
           curl -I http://localhost:8080
       - name: Run Automated Tests
         run: |
