@@ -51,6 +51,8 @@ jobs:
         run: |
           docker ps -a
           docker exec clixx-cont bash -c "echo 'ServerName localhost' >> /etc/apache2/apache2.conf"
+          docker exec clixx-cont ls -la /var/www/html
+
           docker restart clixx-cont
           sleep 40
           HTTP_STATUS=$(docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}" http://localhost:80)
