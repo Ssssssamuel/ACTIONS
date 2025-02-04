@@ -21,10 +21,10 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          # docker stop clixx-cont || true
-          # docker rm clixx-cont || true
-          # docker rmi -f clixx-image:1.0.4 || true
-          # docker system prune -f
+          docker stop clixx-cont || true
+          docker rm clixx-cont || true
+          docker rmi -f clixx-image:1.0.9 || true
+          docker system prune -f
           cd app_code
           docker build -t clixx-image:$IMAGE_TAG .
           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:clixx-image-$IMAGE_TAG
@@ -37,6 +37,13 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
         run: |
+          cat <<EOF > db.setup
+          USE $DB_NAME;
+          UPDATE wp_options SET option_value = 'http://172.17.0.2:8080' WHERE option_value LIKE 'http://localhost:8080';
+          EOF
+
+          mysql -u $DB_USER_NAME --password=$DB_PASSWORD -h $SERVER_INSTANCE -D $DB_NAME < db.setup
+
           docker run -d --name clixx-cont \
             -e DB_HOST=${DB_HOST} \
             -e DB_USER=${DB_USER_NAME} \
@@ -50,12 +57,8 @@ jobs:
       - name: Check Docker Container Status
         run: |
           docker ps -a
-          docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
           docker exec clixx-cont ls -la /var/www/html
-
-          docker restart clixx-cont
-          sleep 40
-          HTTP_STATUS=$(docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}" http://172.17.0.2:80)
+          HTTP_STATUS=$(docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}" http://172.17.0.2:8080)
 
           if [ "$HTTP_STATUS" -ne 200 ]; then
             echo "*******❌ Application test failed! Cleaning environment... ******"
