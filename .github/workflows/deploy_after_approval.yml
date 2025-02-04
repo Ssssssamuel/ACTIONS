@@ -21,7 +21,6 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker logs clixx-cont
           docker stop clixx-cont || true
           docker rm clixx-cont || true
           docker rmi -f clixx-image:1.0.2 || true
