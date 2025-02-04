@@ -21,10 +21,10 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          # docker stop clixx-cont || true
-          # docker rm clixx-cont || true
-          # docker rmi -f clixx-image:1.0.16 || true
-          # docker system prune -f
+          docker stop clixx-cont || true
+          docker rm clixx-cont || true
+          docker rmi -f clixx-image:1.0.18 || true
+          docker system prune -f
           cd app_code
           docker build -t clixx-image:$IMAGE_TAG .
           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:clixx-image-$IMAGE_TAG
