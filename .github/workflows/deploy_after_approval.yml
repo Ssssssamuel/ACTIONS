@@ -46,6 +46,7 @@ jobs:
       - name: Check Docker Container Status
         run: |
           docker ps -a
+          docker exec -it clixx-cont cat /var/www/html/.htaccess
           HTTP_STATUS=$(docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}" http://localhost:80)
 
           if [ "$HTTP_STATUS" -ne 200 ]; then
