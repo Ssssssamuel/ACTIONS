@@ -23,7 +23,7 @@ jobs:
         run: |
           docker stop clixx-cont || true
           docker rm clixx-cont || true
-          docker rmi -f clixx-image:1.0.9 || true
+          docker rmi -f clixx-image:1.0.10 || true
           docker system prune -f
           cd app_code
           docker build -t clixx-image:$IMAGE_TAG .
@@ -37,13 +37,6 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
         run: |
-          cat <<EOF > db.setup
-          USE $DB_NAME;
-          UPDATE wp_options SET option_value = 'http://172.17.0.2:8080' WHERE option_value LIKE 'http://localhost:8080';
-          EOF
-
-          mysql -u $DB_USER_NAME --password=$DB_PASSWORD -h $SERVER_INSTANCE -D $DB_NAME < db.setup
-
           docker run -d --name clixx-cont \
             -e DB_HOST=${DB_HOST} \
             -e DB_USER=${DB_USER_NAME} \
