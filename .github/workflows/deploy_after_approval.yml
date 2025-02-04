@@ -23,7 +23,7 @@ jobs:
         run: |
           docker stop clixx-cont || true
           docker rm clixx-cont || true
-          docker rmi -f clixx-image:1.0.12 || true
+          docker rmi -f clixx-image:1.0.13 || true
           docker system prune -f
           cd app_code
           docker build -t clixx-image:$IMAGE_TAG .
@@ -51,7 +51,7 @@ jobs:
         run: |
           docker ps -a
           docker exec clixx-cont ls -la /var/www/html
-          HTTP_STATUS=$(docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}" http://172.17.0.2:8080)
+          HTTP_STATUS=$(docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}" http://172.17.0.2:80)
           docker logs -f clixx-cont
 
           if [ "$HTTP_STATUS" -ne 200 ]; then
