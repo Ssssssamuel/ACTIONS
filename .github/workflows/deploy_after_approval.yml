@@ -21,10 +21,10 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker stop clixx-cont || true
-          docker rm clixx-cont || true
-          docker rmi -f clixx-image:1.0.18 || true
-          docker system prune -f
+          # docker stop clixx-cont || true
+          # docker rm clixx-cont || true
+          # docker rmi -f clixx-image:1.0.18 || true
+          # docker system prune -f
           cd app_code
           docker build -t clixx-image:$IMAGE_TAG .
           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:clixx-image-$IMAGE_TAG
@@ -51,7 +51,7 @@ jobs:
         run: |
           docker ps -a
           docker exec clixx-cont ls -la /var/www/html
-          HTTP_STATUS=$(docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}" http://localhost:80)
+          HTTP_STATUS=$(docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}" http://172.17.0.2:80)
           
 
           if [ "$HTTP_STATUS" -ne 200 ]; then
@@ -65,7 +65,7 @@ jobs:
           fi
           
           echo "*********✅ Application test passed!**********"
-          curl -v http://localhost:8080
+          curl -v http://172.17.0.2:8080
           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
           docker exec -i clixx-cont ls -l /var/www/html
           docker exec -i clixx-cont cat /var/www/html/index.php
