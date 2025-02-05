@@ -55,32 +55,34 @@
 
 
 
-import os
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Ensure no leftover Chrome processes
-os.system("pkill -9 chrome || true")
-
 # Configure Chrome options
 chrome_options = Options()
-chrome_options.headless = False  # Change to True for CI/CD
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.add_argument(f"--user-data-dir=/tmp/selenium_chrome_user_data")  # Unique path
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--disable-background-networking")
+chrome_options.add_argument("--disable-software-rasterizer")
+
+# 🚀 **Force a unique user profile to avoid conflicts**
+chrome_options.add_argument("--user-data-dir=/tmp/selenium_chrome_user_data")
+chrome_options.add_argument("--remote-debugging-port=9222")  # Helps debug issues
 
 # Initialize WebDriver
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
-# Navigate to the page
+# Navigate to your application
 driver.get("http://localhost:8080")
 
-# Print the title
+# Print page title for confirmation
 print(f"Page title is: {repr(driver.title)}")
 
-# Close the driver
+# Close driver
 driver.quit()
+
 
