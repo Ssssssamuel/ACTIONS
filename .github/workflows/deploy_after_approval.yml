@@ -23,7 +23,7 @@ jobs:
         run: |
           docker stop clixx-cont || true
           docker rm clixx-cont || true
-          docker rmi -f clixx-image:1.0.33 || true
+          docker rmi -f clixx-image:1.0.34 || true
           docker system prune -f
           cd app_code
           docker build -t clixx-image:$IMAGE_TAG .
@@ -65,7 +65,7 @@ jobs:
           fi
           
           echo "*********✅ Application test passed!**********"
-          curl http://172.17.0.2:8080
+          curl http://localhost:8080
           curl -v http://172.17.0.2:8080
           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
           docker exec -i clixx-cont ls -l /var/www/html
