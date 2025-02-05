@@ -23,7 +23,7 @@ jobs:
         run: |
           docker stop clixx-cont || true
           docker rm clixx-cont || true
-          docker rmi -f clixx-image:1.0.39 || true
+          docker rmi -f clixx-image:1.0.41 || true
           docker system prune -f
           cd app_code
           docker build -t clixx-image:$IMAGE_TAG .
@@ -75,9 +75,14 @@ jobs:
         run: |
           sudo apt install -y python3-pip xvfb
           pip3 install selenium webdriver-manager
+          sudo apt install -y google-chrome-stable
 
       - name: Run Selenium Test
-        run: python3 test/selenium_test.py
+        run: |
+          google-chrome --version
+          chromedriver --version
+          pkill -9 chrome || true
+          python3 test/selenium_test.py
 
   # 🟢 Step 2: Manual Approval Required
   manual-approval:
