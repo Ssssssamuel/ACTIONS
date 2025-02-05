@@ -40,7 +40,7 @@ service = Service()  # You can specify a chromedriver path if needed
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # Navigate to the page
-driver.get("http://localhost:8080")
+driver.get("http://172.17.0.2:8080")
 
 # Wait for the page title
 WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "title")))

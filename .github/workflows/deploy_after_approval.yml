@@ -42,7 +42,7 @@ jobs:
             -e DB_USER=${DB_USER_NAME} \
             -e DB_PASSWORD=${DB_PASSWORD} \
             -e DB_NAME=${DB_NAME} \
-            -p 8080:80 clixx-image:$IMAGE_TAG
+            -p 8080:8080 clixx-image:$IMAGE_TAG
 
       - name: Wait for Container to Initialize
         run: sleep 40  # Wait for app to start properly
@@ -51,7 +51,7 @@ jobs:
         run: |
           docker ps -a
           docker exec clixx-cont ls -la /var/www/html
-          HTTP_STATUS=$(docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}" http://172.17.0.2:80)
+          HTTP_STATUS=$(docker exec clixx-cont curl -s -o /dev/null -w "%{http_code}" http://172.17.0.2:8080)
           
 
           if [ "$HTTP_STATUS" -ne 200 ]; then
