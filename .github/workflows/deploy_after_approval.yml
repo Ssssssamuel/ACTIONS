@@ -23,7 +23,7 @@ jobs:
         run: |
           docker stop clixx-cont || true
           docker rm clixx-cont || true
-          docker rmi -f clixx-image:1.0.42 || true
+          docker rmi -f clixx-image:1.0.43 || true
           docker system prune -f
           cd app_code
           docker build -t clixx-image:$IMAGE_TAG .

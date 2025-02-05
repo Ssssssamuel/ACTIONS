@@ -55,8 +55,6 @@
 
 
 
-import shutil
-import os
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -64,24 +62,21 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import os
 
-# Define the user-data-dir directory path
-user_data_dir = "/tmp/selenium-user-data"
-
-# If the directory exists, delete it before starting the test
-if os.path.exists(user_data_dir):
-    shutil.rmtree(user_data_dir)
+# Ensure no existing Chrome processes
+os.system("pkill -9 chrome || true")
 
 # Configure Chrome options
 chrome_options = Options()
-chrome_options.headless = False  # Set to True for CI/CD, False for debugging
-chrome_options.add_argument("--no-sandbox")  # Required for CI/CD environments
-chrome_options.add_argument("--disable-dev-shm-usage")  # Prevent memory issues
-chrome_options.add_argument(f"--user-data-dir={user_data_dir}")  # Ensure unique user data directory
-chrome_options.add_argument("--remote-debugging-port=9222")  # Allow debugging
+chrome_options.headless = False  # Set to True for CI/CD
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+# REMOVE --user-data-dir
+# REMOVE --remote-debugging-port
 
-# Initialize WebDriver with Chrome options
-service = Service(ChromeDriverManager().install())  # Use Service explicitly
+# Initialize WebDriver
+service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # Navigate to the page
@@ -92,7 +87,7 @@ WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "ti
 
 # Print and verify the page title
 print(f"Page title is: {repr(driver.title)}")
-assert "CliXX Retail! Best Products On The Market" in driver.title.replace('\n', '').replace('\r', '').strip()
+assert "CliXX Retail! Best Products On The Market" in driver.title.strip()
 
 # Close the driver
 driver.quit()
