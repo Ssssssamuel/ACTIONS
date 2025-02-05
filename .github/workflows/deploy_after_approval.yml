@@ -42,7 +42,7 @@ jobs:
             -e DB_USER=${DB_USER_NAME} \
             -e DB_PASSWORD=${DB_PASSWORD} \
             -e DB_NAME=${DB_NAME} \
-            -p 8080:8080 clixx-image:$IMAGE_TAG
+            -p 8080:8080 -p 80:80 clixx-image:$IMAGE_TAG
 
       - name: Wait for Container to Initialize
         run: sleep 40  # Wait for app to start properly
