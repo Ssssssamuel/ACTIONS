@@ -55,6 +55,8 @@
 
 
 
+import shutil
+import os
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -63,12 +65,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+# Define the user-data-dir directory path
+user_data_dir = "/tmp/selenium-user-data"
+
+# If the directory exists, delete it before starting the test
+if os.path.exists(user_data_dir):
+    shutil.rmtree(user_data_dir)
+
 # Configure Chrome options
 chrome_options = Options()
 chrome_options.headless = False  # Set to True for CI/CD, False for debugging
 chrome_options.add_argument("--no-sandbox")  # Required for CI/CD environments
 chrome_options.add_argument("--disable-dev-shm-usage")  # Prevent memory issues
-chrome_options.add_argument("--user-data-dir=/tmp/selenium-user-data")  # Prevent profile lock
+chrome_options.add_argument(f"--user-data-dir={user_data_dir}")  # Ensure unique user data directory
 chrome_options.add_argument("--remote-debugging-port=9222")  # Allow debugging
 
 # Initialize WebDriver with Chrome options
