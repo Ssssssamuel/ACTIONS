@@ -31,7 +31,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 # Configure Chrome options
 chrome_options = Options()
-chrome_options.add_argument("--headless")  # Run Chrome in headless mode
+chrome_options.headless = False
+#chrome_options.add_argument("--headless")  # Run Chrome in headless mode
 chrome_options.add_argument("--no-sandbox")  # Required for CI/CD environments
 chrome_options.add_argument("--disable-dev-shm-usage")  # Prevent memory issues
 
