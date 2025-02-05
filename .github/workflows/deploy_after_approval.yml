@@ -21,10 +21,10 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          # docker stop clixx-cont || true
-          # docker rm clixx-cont || true
-          # docker rmi -f clixx-image:1.0.31 || true
-          # docker system prune -f
+          docker stop clixx-cont || true
+          docker rm clixx-cont || true
+          docker rmi -f clixx-image:1.0.33 || true
+          docker system prune -f
           cd app_code
           docker build -t clixx-image:$IMAGE_TAG .
           docker tag clixx-image:$IMAGE_TAG $ECR_REPOSITORY_URI:clixx-image-$IMAGE_TAG
@@ -65,8 +65,8 @@ jobs:
           fi
           
           echo "*********✅ Application test passed!**********"
-          curl http://localhost:8080
-          curl -v http://localhost:8080
+          curl http://172.17.0.2:8080
+          curl -v http://172.17.0.2:8080
           docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clixx-cont
           docker exec -i clixx-cont ls -l /var/www/html
           docker exec -i clixx-cont cat /var/www/html/index.php
