@@ -79,9 +79,7 @@ jobs:
 
       - name: Run Selenium Test
         run: |
-          pkill -9 chrome || true
-          pkill -9 chromedriver || true
-          rm -rf /tmp/selenium_chrome_user_data
+          rm -rf /tmp/selenium_chrome_user_data || true
           python3 test/selenium_test.py
 
   # 🟢 Step 2: Manual Approval Required

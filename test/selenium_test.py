@@ -60,29 +60,30 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Configure Chrome options
+# ✅ Configure Chrome options
 chrome_options = Options()
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--no-sandbox")  # Required for CI environments
+chrome_options.add_argument("--disable-dev-shm-usage")  # Fix memory issues
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--disable-background-networking")
 chrome_options.add_argument("--disable-software-rasterizer")
 
-# 🚀 **Force a unique user profile to avoid conflicts**
-chrome_options.add_argument("--user-data-dir=/tmp/selenium_chrome_user_data")
-chrome_options.add_argument("--remote-debugging-port=9222")  # Helps debug issues
+# 🚀 **Force a new user profile to avoid conflicts**
+chrome_options.add_argument(f"--user-data-dir=/tmp/selenium_chrome_user_data_{hash(str(id(chrome_options)))}")
+chrome_options.add_argument("--remote-debugging-port=9222")  # Helps debugging
 
-# Initialize WebDriver
+# ✅ Initialize WebDriver
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
-# Navigate to your application
+# ✅ Navigate to your application
 driver.get("http://localhost:8080")
 
-# Print page title for confirmation
+# ✅ Print page title for confirmation
 print(f"Page title is: {repr(driver.title)}")
 
-# Close driver
+# ✅ Close driver
 driver.quit()
+
 
 
